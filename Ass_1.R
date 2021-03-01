@@ -129,6 +129,7 @@ par(mfrow=c(2,2))
 plot(model1)
 
 # try higher order
+model1 <- lm(clo ~ tInOp*sex+tOut^2, data = clothingSum)
 # try log transform 
 # try chisqu test to see difference
 
