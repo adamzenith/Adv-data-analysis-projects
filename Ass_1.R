@@ -4,9 +4,14 @@
 # _________________
 # Load data 
 # _________________
-setwd("~/Documents/Studie/Mst-Sem2-2021/Advanced Data Analysis and Stastitical Modelling/Assigm1")
-#clothingSum <- read.csv(file = '/Users/idabukhvillesen/Dropbox/8 SEMESTER/Adv. Data Ana. & Stat. Mod./Assignments/Assignment 1/clothingSum.csv')
-clothingSum <- read.csv(file = 'clothingSum.csv')
+#Helena 
+#setwd("~/Documents/Studie/Mst-Sem2-2021/Advanced Data Analysis and Stastitical Modelling/Assigm1")
+
+#Ida
+clothingSum <- read.csv(file = '/Users/idabukhvillesen/Documents/GitHub/Adv-data-analysis-projects/clothingSum.csv')
+
+#Load 
+#clothingSum <- read.csv(file = 'clothingSum.csv')
 
 # make sex binary variable
 clothingSum$sex <- as.factor (clothingSum$sex) 
@@ -129,9 +134,71 @@ par(mfrow=c(2,2))
 plot(model1)
 
 # try higher order
-model1 <- lm(clo ~ tInOp*sex+tOut^2, data = clothingSum)
+model2 <- lm(clo ~ tInOp*sex+tOut^2, data = clothingSum)
+summary(model2)
+anova(model2)
+par(mfrow=c(2,2))
+plot(model2)
+#does not really improve the model here 
+
+#test model level 1 vs higehr order 
+anova(model1,model2,test="Chisq") #exactly the same 
+
+
 # try log transform 
-# try chisqu test to see difference
+model3 <- lm(log(clo) ~ tInOp*sex+tOut, data = clothingSum)
+summary(model3)
+anova(model3)
+par(mfrow=c(2,2))
+plot(model3)
+
+library(MASS)
+qqPlot(model3,reps=10000)
+qqPlot(model3,simulate=FALSE)
+#from the qq-plot the log transformes is not too good either :( 
+
+
+#try another type of higer order 
+model4 <- lm(clo ~ (tInOp*sex+tOut)^2, data = clothingSum)
+summary(model4)
+anova(model4)
+par(mfrow=c(2,2))
+plot(model4)
+#still the same variables that are important
+
+#make model smaller
+model5 <- lm(clo ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum)
+summary(model5)
+anova(model5)
+par(mfrow=c(2,2))
+plot(model5)
+
+
+#log
+model6 <- lm(log(clo) ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum)
+summary(model6)
+anova(model6)
+par(mfrow=c(2,2))
+plot(model6)
+
+
+model6 <- lm(log(clo) ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum)
+summary(model6)
+anova(model6)
+par(mfrow=c(2,2))
+plot(model6)
+
+
+# Add weights to the model -> sub question A.4
+model7 <- lm(log(clo) ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum, weights=(rep(0.5, 136))^(1/2))
+summary(model7)
+anova(model7)
+par(mfrow=c(2,2))
+plot(model7)
+
+
+
+# try chisqu test to see difference -> anova(model1,model2,test="Chisq")
 
 
 
