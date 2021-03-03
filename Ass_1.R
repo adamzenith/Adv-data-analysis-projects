@@ -199,7 +199,58 @@ plot(model7)
 
 
 
-# try chisqu test to see difference -> anova(model1,model2,test="Chisq")
+# ______________
+# DOING WEIGHTS 
+varMale <- var(dataMale$clo)
+varFem <- var(dataFem$clo)
+
+n <- 136
+v <- rep(0,n)
+for(i in 1:n){
+  if (clothingSum$isFemale[i] == 0){
+    v[i] = varMale
+  }
+  else {
+    v[i] = varFem 
+  }
+}
+
+model8 <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
+summary(model8)
+anova(model8)
+par(mfrow=c(2,2))
+plot(model8)
+# argue to remove leverage point no 22 
+library(car)
+qqPlot(model8,reps=10000)
+qqPlot(model8,simulate=FALSE)
+
+#library(emmeans)
+#emmeans(model8, clothingSum$clo, by=clothingSum$sex)
+
+
+#log trans good model
+model10 <- lm(log(clo) ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
+summary(model10)
+anova(model10)
+par(mfrow=c(2,2))
+plot(model10)
+# not a good idea :( (:
+
+
+# same model no weights 
+model9 <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum)
+summary(model9)
+anova(model9)
+par(mfrow=c(2,2))
+plot(model9)
+# we see that the quantiles in the qqPlot is fucked, tihi 
+
+
+
+
+
+
 
 
 
