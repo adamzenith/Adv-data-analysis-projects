@@ -8,10 +8,11 @@
 #setwd("~/Documents/Studie/Mst-Sem2-2021/Advanced Data Analysis and Stastitical Modelling/Assigm1")
 
 #Ida
-clothingSum <- read.csv(file = '/Users/idabukhvillesen/Documents/GitHub/Adv-data-analysis-projects/clothingSum.csv')
+#clothingSum <- read.csv(file = '/Users/idabukhvillesen/Documents/GitHub/Adv-data-analysis-projects/clothingSum.csv')
 
-#Load 
-#clothingSum <- read.csv(file = 'clothingSum.csv')
+#Matty
+setwd("C:/Users/Bruger/Documents/GitHub/Adv-data-analysis-projects")
+clothingSum <- read.csv(file = 'clothingSum.csv')
 
 # make sex binary variable
 clothingSum$sex <- as.factor (clothingSum$sex) 
@@ -134,7 +135,7 @@ par(mfrow=c(2,2))
 plot(model1)
 
 # try higher order
-model2 <- lm(clo ~ tInOp*sex+tOut^2, data = clothingSum)
+model2 <- lm(clo ~ tInOp*sex+tOut+I(tOut^2)-tOut, data = clothingSum)
 summary(model2)
 anova(model2)
 par(mfrow=c(2,2))
