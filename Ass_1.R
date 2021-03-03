@@ -217,8 +217,11 @@ for(i in 1:n){
 model8 <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
 summary(model8)
 anova(model8)
-par(mfrow=c(2,2))
+par(mfrow=c(1,1))
 plot(model8)
+
+
+plot(as.numeric(clothingSum$subjId), model8$residuals)
 # argue to remove leverage point no 22 
 library(car)
 qqPlot(model8,reps=10000)
@@ -246,7 +249,17 @@ plot(model9)
 # we see that the quantiles in the qqPlot is fucked, tihi 
 
 
+#MODEL with subjId
+model10 <- lm(clo ~ tInOp*sex+I(tOut^2)+subjId, data = clothingSum, weights = 1/v)
+summary(model10)
+anova(model10)
+par(mfrow=c(2,2))
+plot(model10)
 
+#Visual presentation of params
+
+par(mfrow=c(1,1))
+plot(model10$coefficients)
 
 
 
