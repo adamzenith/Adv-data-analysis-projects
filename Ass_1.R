@@ -79,6 +79,11 @@ pairs(clothingSum, panel = panel.smooth, main = "Clothing Data")
 # SUMMARY OF ALL DATA 
 summary(clothingSum)
 
+library(xtable)
+library(plyr)
+dtf <- sapply(clothingSum, each(min, max, mean, sd, var, median, IQR))
+xtable(dtf)
+
 # BOX PLOTS 
 par(mfrow=c(1,3))
 boxplot(clothingSum$clo ~clothingSum$sex, col=2:6)
