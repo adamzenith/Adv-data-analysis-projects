@@ -10,9 +10,6 @@
 #Ida
 clothingSum <- read.csv(file = '/Users/idabukhvillesen/Documents/GitHub/Adv-data-analysis-projects/clothingSum.csv')
 
-#Load 
-#clothingSum <- read.csv(file = 'clothingSum.csv')
-
 # make sex binary variable
 clothingSum$sex <- as.factor (clothingSum$sex) 
 clothingSum$day <- as.factor(clothingSum$day)
@@ -36,54 +33,36 @@ for(i in 1:length(clothingSum$isFemale)){
   }
 }
 
+#################################
+# SECTION A ----
 # _________________
 # A.1 Explore data
 # _________________
 
-# _____
-#clothing scale vs in + out door temp 
-# _____
 ClothTemp <- cbind(clothingSum$clo,clothingSum$tOut,clothingSum$tInOp);
 
-# correlations and co-variances in the above data 
+# CORRELATIONS AND COVARIANCE
 cov(ClothTemp)
 cor(ClothTemp)
 library(corrplot)
 corrplot(cor(ClothTemp))
 
-# _____
-# clothing scale vs sex 
-# _____
-plot(clothingSum$isFemale,clothingSum$clo)
-#from the plot is is clear that females generally wear much more clothes than men 
 
-#mean and variance clothing female and male 
-mean_fem <- mean(dataFem$clo)
-mean_male <- mean(dataMale$clo)
-var_fem <- var(dataFem$clo)
-var_male <- var(dataMale$clo)
-#the variance for men is much lower
-#maybe bc men all dress the same, and women can choose more freely, lol
-#like dresses, skirts, tops etc. 
-
-# indoor temp vs sex 
+# SEX VS TEMP PLOTS 
+# indoor
 plot(dataFem$clo,dataFem$tInOp,col=2,main="Indoor temp vs sex",pch=2)
 points(dataMale$clo,dataMale$tInOp,col=1,pch=4)
-
-# out-door temp vs sex 
+# out-door 
 plot(dataFem$clo,dataFem$tOut,col=2,main="Outdoor temp vs sex",pch=2)
 points(dataMale$clo,dataMale$tOut,col=1,pch=4)
 
 
-# Helena Section
-############################################################
-############################################################
-
+# making data factors
 clothingSum$sex = factor(clothingSum$sex)
 clothingSum$day = factor(clothingSum$day)
 clothingSum$subjId = factor(clothingSum$subjId)
 
-# Density plot of Clo: 
+# DENSITY PLOT OF CLOTING  
 f<-function(x){dnorm(x,mean=mean(clothingSum$clo,na.rm=T),
                      sd=sd(clothingSum$clo,na.rm=T))} 
 hist(clothingSum$clo,xlab='Clothing',probability=T)
@@ -91,47 +70,39 @@ curve(f,0,1,lwd=3,col="red",add=T)
 rm(f)
 par(mfrow=c(1,1))
 
-
+# ???? NOT SURE WHAT THIS IS 
 par(mfrow=c(2,1))
 plot(clothingSum$clo~clothingSum$tOut+clothingSum$tInOp,pch=as.numeric(clothingSum$sex),
      col=rep(c(0,1), each=50)+1)
-
 pairs(clothingSum, panel = panel.smooth, main = "Clothing Data")
 
+# SUMMARY OF ALL DATA 
 summary(clothingSum)
 
-
+# BOX PLOTS 
 par(mfrow=c(1,3))
 boxplot(clothingSum$clo ~clothingSum$sex, col=2:6)
 boxplot(clothingSum$tInOp ~clothingSum$sex, col=2:6)
 boxplot(clothingSum$tOut ~clothingSum$sex, col=2:6)
 
-par(mfrow=c(1,1))
-interaction.plot(x.factor     = clothingSum$tOut,
-                 trace.factor = clothingSum$sex, 
-                 response     = clothingSum$clo, 
-                 fun = mean,
-                 type="b",
-                 col=c("black","red"),  ### Colors for levels of trace var.
-                 pch=c(19,17),             ### Symbols for levels of trace var.
-                 fixed=TRUE)
 
-############################################################
-# Models ###################################################
-############################################################
+# MODELS A.2
 
+# initial model
+# all possible combinations of paramters 
 model0 <- lm(clo ~ tInOp*tOut*sex, data = clothingSum)
-
 summary(model0)
 anova(model0)
 par(mfrow=c(2,2))
 plot(model0)
 
+# decrease model complexity 
 model1 <- lm(clo ~ tInOp*sex+tOut, data = clothingSum)
 summary(model1)
 anova(model1)
 par(mfrow=c(2,2))
 plot(model1)
+# all parameters significant 
 
 # try higher order
 model2 <- lm(clo ~ tInOp*sex+tOut^2, data = clothingSum)
@@ -144,18 +115,19 @@ plot(model2)
 #test model level 1 vs higehr order 
 anova(model1,model2,test="Chisq") #exactly the same 
 
-
-# try log transform 
-model3 <- lm(log(clo) ~ tInOp*sex+tOut, data = clothingSum)
+# try log transform the data 
+model3 <- lm(log(clo) ~ tInOp*sex+tOut^2, data = clothingSum)
 summary(model3)
 anova(model3)
 par(mfrow=c(2,2))
 plot(model3)
+# does not really do anything for the data as well 
 
-library(MASS)
+library(car)
 qqPlot(model3,reps=10000)
 qqPlot(model3,simulate=FALSE)
 #from the qq-plot the log transformes is not too good either :( 
+# the quantiles and the center is outside CI 
 
 
 #try another type of higer order 
@@ -165,6 +137,7 @@ anova(model4)
 par(mfrow=c(2,2))
 plot(model4)
 #still the same variables that are important
+# also the quantiles here are all off 
 
 #make model smaller
 model5 <- lm(clo ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum)
@@ -173,33 +146,25 @@ anova(model5)
 par(mfrow=c(2,2))
 plot(model5)
 
-
-#log
-model6 <- lm(log(clo) ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum)
+# IN CONCLUSION 
+# we choose this model 
+model6 <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum)
 summary(model6)
 anova(model6)
 par(mfrow=c(2,2))
 plot(model6)
 
 
-model6 <- lm(log(clo) ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum)
-summary(model6)
-anova(model6)
-par(mfrow=c(2,2))
-plot(model6)
-
-
-# Add weights to the model -> sub question A.4
-model7 <- lm(log(clo) ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum, weights=(rep(0.5, 136))^(1/2))
-summary(model7)
-anova(model7)
-par(mfrow=c(2,2))
-plot(model7)
-
-
+# but the quantiles are still of, so we add weight 
+# -> weighted least squares 
+# variances on the diagonal 
 
 # ______________
-# DOING WEIGHTS 
+# DOING WEIGHTS A.4
+# ______________
+
+# find the variances for clo for the sexes
+# this is used as weights in v for the model 
 varMale <- var(dataMale$clo)
 varFem <- var(dataFem$clo)
 
@@ -214,22 +179,19 @@ for(i in 1:n){
   }
 }
 
-model8 <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
-summary(model8)
-anova(model8)
-par(mfrow=c(1,1))
-plot(model8)
-
-
-plot(as.numeric(clothingSum$subjId), model8$residuals)
+# add weights to the model 
+model_final <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
+summary(model_final)
+anova(model_final)
+par(mfrow=c(2,2))
+plot(model_final)
 # argue to remove leverage point no 22 
 library(car)
-qqPlot(model8,reps=10000)
-qqPlot(model8,simulate=FALSE)
+qqPlot(model_final,reps=10000)
+qqPlot(model_final,simulate=FALSE)
 
 #library(emmeans)
 #emmeans(model8, clothingSum$clo, by=clothingSum$sex)
-
 
 #log trans good model
 model10 <- lm(log(clo) ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
@@ -240,26 +202,44 @@ plot(model10)
 # not a good idea :( (:
 
 
-# same model no weights 
-model9 <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum)
-summary(model9)
-anova(model9)
-par(mfrow=c(2,2))
-plot(model9)
-# we see that the quantiles in the qqPlot is fucked, tihi 
+
+# POINT A.5
+# make model prediction and plot for model_final
 
 
-#MODEL with subjId
+## PREDICTION PLOTS -> make it work :) 
+pred <- predict(model8,type="response",interval = "confidence")
+par(mfrow=c(1,1))
+#plot(clothingSum$,dat$cases) ## clear increase in time
+plot(clothingSum$tOut,pred[1:n,1])
+lines(sort(clothingSum$tOut),pred[1:n,1])
+
+
+# POINT A.6 
+plot(as.numeric(clothingSum$subjId),model_final$residuals)
+
+#################################
+# SECTION B ----
+
+#MODEL with subjId 
+
+# B.1
 model10 <- lm(clo ~ tInOp*sex+I(tOut^2)+subjId, data = clothingSum, weights = 1/v)
 summary(model10)
 anova(model10)
 par(mfrow=c(2,2))
 plot(model10)
 
-#Visual presentation of params
 
+#Visual presentation of params
+# B.2 
 par(mfrow=c(1,1))
 plot(model10$coefficients)
+
+
+
+
+
 
 
 
