@@ -144,6 +144,9 @@ plot(model4)
 #still the same variables that are important
 # also the quantiles here are all off 
 
+#test model 
+anova(model1,model4,test="Chisq") 
+
 #make model smaller
 model5 <- lm(clo ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum)
 summary(model5)
@@ -159,6 +162,14 @@ anova(model6)
 par(mfrow=c(2,2))
 plot(model6)
 
+par(mfrow=c(1,1))
+qqPlot(model6,reps=10000)
+qqPlot(model6,simulate=FALSE,ylab="Studentized Residuals - model 4", main="qqPlot for model 4 \n Best non-weighted model")
+
+
+
+#test model
+anova(model1,model6,test="Chisq") #
 
 # but the quantiles are still of, so we add weight 
 # -> weighted least squares 
@@ -213,6 +224,16 @@ plot(model10)
 
 
 ## PREDICTION PLOTS -> make it work :) 
+final_data=clothingSum[order(clothingSum[,6],clothingSum[,4],clothingSum[,3]),]
+model_final <- lm(clo ~ tInOp*sex+I(tOut^2), data = final_data, weights = 1/v)
+pred <- predict(model_final,type="response",interval = "confidence")
+par(mfrow=c(1,1))
+plot(pred[,1],pch = 19,col=4)
+lines(pred[,2],col=2,lty = 2)
+lines(pred[,3],col=2,lty = 2)
+points(final_data[,3],col=8,pch = 3)
+
+
 pred <- predict(model8,type="response",interval = "confidence")
 par(mfrow=c(1,1))
 #plot(clothingSum$,dat$cases) ## clear increase in time
