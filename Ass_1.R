@@ -10,9 +10,15 @@
 #Ida
 #clothingSum <- read.csv(file = '/Users/idabukhvillesen/Documents/GitHub/Adv-data-analysis-projects/clothingSum.csv')
 
+<<<<<<< Updated upstream
 #Matty
 setwd("C:/Users/Bruger/Documents/GitHub/Adv-data-analysis-projects")
 clothingSum <- read.csv(file = 'clothingSum.csv')
+=======
+#matt
+clothingFull<-read.csv('clothingFull.csv')
+clothingSum <- read.csv('clothingSum.csv')
+>>>>>>> Stashed changes
 
 # make sex binary variable
 clothingSum$sex <- as.factor (clothingSum$sex) 
@@ -187,7 +193,38 @@ model6 <- lm(log(clo) ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum)
 summary(model6)
 anova(model6)
 par(mfrow=c(2,2))
+<<<<<<< Updated upstream
 plot(model6)
+=======
+plot(model10)
+# not a good idea :( (:
+
+
+
+# POINT A.5
+# make model prediction and plot for model_final
+final=clothingSum[order(clothingSum[,6],clothingSum[,4]),]
+
+## PREDICTION PLOTS -> make it work :) 
+pred <- predict(model_final,type="response",interval = "confidence")
+par(mfrow=c(1,1))
+
+plot(pred[,1])
+points(clothingSum$clo,col=2)
+plot((clothingSum$clo-pred[,1]))
+lines(pred[,2],col=2)
+lines(pred[,3],col=2)
+#plot(clothingSum$,dat$cases) ## clear increase in time
+plot(clothingSum$tOut,pred[1:n,1])
+lines(sort(clothingSum$tOut),pred[1:n,1])
+
+
+# POINT A.6 
+plot(as.numeric(clothingSum$subjId),model_final$residuals)
+
+#################################
+# SECTION B ----
+>>>>>>> Stashed changes
 
 
 # Add weights to the model -> sub question A.4
@@ -195,11 +232,87 @@ model7 <- lm(log(clo) ~ tInOp+sex+tOut+tInOp:sex, data = clothingSum, weights=(r
 summary(model7)
 anova(model7)
 par(mfrow=c(2,2))
+<<<<<<< Updated upstream
 plot(model7)
+=======
+plot(model10)
+
+
+#Visual presentation of params
+# B.2 
+par(mfrow=c(1,1))
+plot(model10$coefficients)
 
 
 
+#FULL DATASET
+#C.1
+clothingFull<-read.csv('clothingFull.csv')
+clothingFull=clothingFull[order(clothingFull[,5],clothingFull[3]),]
+
+dataFemFull <- clothingFull[1,1:7] 
+dataMaleFull <- clothingFull[1,1:7] 
+#make a female and male data set 
+for(i in 1:length(clothingFull$X)){
+  if (clothingFull$sex[i] == 'female'){
+    dataFemFull <- rbind(dataFemFull,clothingFull[i,1:7])
+  }
+  else{
+    dataMaleFull <- rbind(dataMaleFull,clothingFull[i,1:7])
+  }
+}
+
+>>>>>>> Stashed changes
+
+
+varMaleFull <- var(dataMaleFull$clo)
+varFemFull <- var(dataFemFull$clo)
+
+<<<<<<< Updated upstream
 # try chisqu test to see difference -> anova(model1,model2,test="Chisq")
+=======
+n <- length(clothingFull$X)
+vFull <- rep(0,n)
+for(i in 1:n){
+  if (clothingFull$sex[i] == 'male'){
+    vFull[i] = varMale
+  }
+  else {
+    vFull[i] = varFem 
+  }
+}
+>>>>>>> Stashed changes
+
+# add weights to the model 
+model_fulldata <- lm((clo) ~ tInOp*sex+I(tOut^2), data = clothingFull, weights = 1/vFull)
+
+plot(model_fulldata$residuals)
+summary(model_fulldata)
+anova(model_fulldata)
+par(mfrow=c(2,2))
+plot(model_fulldata)
 
 
+model_final$
 
+logLik(model_final)
+logLik(model_final)
+
+
+n<-length(clothingSum$subjId)
+
+Function<-function(v){
+  
+  
+  model_final <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
+  -logLik(model_final)
+}
+new=optim(v,Function)
+par(mfrow=c(2,2))
+plot(model_final)
+
+
+model_optimized <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/new$par)
+
+plot(model_final)
+plot(model_optimized)
