@@ -203,8 +203,9 @@ par(mfrow=c(2,2))
 plot(model_final)
 # argue to remove leverage point no 22 
 library(car)
+par(mfrow=c(1,1))
 qqPlot(model_final,reps=10000)
-qqPlot(model_final,simulate=FALSE)
+qqPlot(model_final,simulate=FALSE, main="qqPlot for the weighted best model \n (model 4)")
 
 #library(emmeans)
 #emmeans(model8, clothingSum$clo, by=clothingSum$sex)
@@ -261,6 +262,11 @@ plot(model10)
 # B.2 
 par(mfrow=c(1,1))
 plot(model10$coefficients)
+
+subjectID_coef <- as.numeric(c(model10$coefficients[5:47],model10$coefficients[49:50]))
+plot(subjectID_coef,main="Estimated parameters for SubjectID ",ylab="Parameter estimate", col= 2, pch=19)
+var(subjectID_coef)
+
 
 
 
