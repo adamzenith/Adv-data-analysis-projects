@@ -207,11 +207,24 @@ par(mfrow=c(1,1))
 qqPlot(model_final,reps=10000)
 qqPlot(model_final,simulate=FALSE, main="qqPlot for the weighted best model \n (model 4)")
 
-#library(emmeans)
-#emmeans(model8, clothingSum$clo, by=clothingSum$sex)
+
+
+# Using the likelihood to optimize the parameters 
+# with initial guesses as the variances 
+Function<-function(v){
+  model_final_loglik <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
+  -logLik(model_final_loglik)
+}
+new_loglik_func=optim(v,Function)
+par(mfrow=c(2,2))
+model_final_loglik <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/new_loglik_func$par)
+plot(model_final_loglik)
+qqPlot(model_final_loglik,reps=10000)
+qqPlot(model_final_loglik,simulate=FALSE, main="qqPlot for the weighted best model \n (model 4)")
+
 
 #log trans good model
-model10 <- lm(log(clo) ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
+model10 <- lm(log(clo) ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/new_loglik_func$par)
 summary(model10)
 anova(model10)
 par(mfrow=c(2,2))
@@ -251,22 +264,35 @@ plot(as.numeric(clothingSum$subjId),model_final$residuals)
 #MODEL with subjId 
 
 # B.1
-model10 <- lm(clo ~ tInOp*sex+I(tOut^2)+subjId, data = clothingSum, weights = 1/v)
-summary(model10)
-anova(model10)
+model11 <- lm(clo ~ tInOp*sex+I(tOut^2)+subjId, data = clothingSum, weights = 1/new_loglik_func$par)
+summary(model11)
+anova(model11)
 par(mfrow=c(2,2))
-plot(model10)
+plot(model11)
 
+Function_subjectID<-function(v){
+  model_subject_loglik <- lm(clo ~ tInOp*sex+I(tOut^2)+subjId, data = clothingSum, weights = 1/v)
+  -logLik(model_subject_loglik)
+}
+loglik_func_subject=optim(v,Function_subjectID)
+final_loglik_subject <- lm(clo ~ tInOp*sex+I(tOut^2)+subjId, data = clothingSum, weights = 1/loglik_func_subject$par)
+par(mfrow=c(2,2))
+plot(final_loglik_subject)
+summary(final_loglik_subject)
+anova(final_loglik_subject)
 
 #Visual presentation of params
 # B.2 
 par(mfrow=c(1,1))
-plot(model10$coefficients)
+plot(final_loglik_subject$coefficients)
 
-subjectID_coef <- as.numeric(c(model10$coefficients[5:47],model10$coefficients[49:50]))
+subjectID_coef <- as.numeric(c(final_loglik_subject$coefficients[5:47],final_loglik_subject$coefficients[49:50]))
 plot(subjectID_coef,main="Estimated parameters for SubjectID ",ylab="Parameter estimate", col= 2, pch=19)
-var(subjectID_coef)
-
+abline(h=mean(subjectID_coef), col="blue")
+abline(h=mean(subjectID_coef)+1.96*sqrt(var(subjectID_coef)), col="blue",lty = 2)
+abline(h=mean(subjectID_coef)-1.96*sqrt(var(subjectID_coef)), col="blue",lty = 2)
+legend(0, -0.3, legend=c("Mean", "95% CI"),
+       col=c("blue", "blue"), lty=1:2, cex=0.8)
 
 
 
