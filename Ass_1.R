@@ -86,9 +86,9 @@ xtable(dtf)
 
 # BOX PLOTS 
 par(mfrow=c(1,3))
-boxplot(clothingSum$clo ~clothingSum$sex, col=2:6)
-boxplot(clothingSum$tInOp ~clothingSum$sex, col=2:6)
-boxplot(clothingSum$tOut ~clothingSum$sex, col=2:6)
+boxplot(clothingSum$clo ~clothingSum$sex, col=c("firebrick2","blue"))
+boxplot(clothingSum$tInOp ~clothingSum$sex, col=c("firebrick2","blue"))
+boxplot(clothingSum$tOut ~clothingSum$sex, col=c("firebrick2","blue"))
 
 
 # MODELS A.2
@@ -219,8 +219,9 @@ new_loglik_func=optim(v,Function)
 par(mfrow=c(2,2))
 model_final_loglik <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/new_loglik_func$par)
 plot(model_final_loglik)
+par(mfrow=c(1,1))
 qqPlot(model_final_loglik,reps=10000)
-qqPlot(model_final_loglik,simulate=FALSE, main="qqPlot for the weighted best model \n (model 4)")
+qqPlot(model_final_loglik,simulate=FALSE, main="qqPlot for the weighted best optimzed model \n (model 4)")
 
 
 #log trans good model
@@ -237,26 +238,46 @@ plot(model10)
 # make model prediction and plot for model_final
 
 
-## PREDICTION PLOTS -> make it work :) 
-final_data=clothingSum[order(clothingSum[,6],clothingSum[,4],clothingSum[,3]),]
-model_final <- lm(clo ~ tInOp*sex+I(tOut^2), data = final_data, weights = 1/v)
-pred <- predict(model_final,type="response",interval = "confidence")
-par(mfrow=c(1,1))
-plot(pred[,1],pch = 19,col=4)
-lines(pred[,2],col=2,lty = 2)
-lines(pred[,3],col=2,lty = 2)
-points(final_data[,3],col=8,pch = 3)
+## PREDICTION PLOTS
+model_final <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
+pred_male_out <- predict(model_final,type="response",interval = "confidence",newdata =clothingSum_male_out )
+pred_female_out <- predict(model_final,type="response",interval = "confidence",newdata =clothingSum_female_out )
+pred_male_in <- predict(model_final,type="response",interval = "confidence",newdata =clothingSum_male_in )
+pred_female_in <- predict(model_final,type="response",interval = "confidence",newdata =clothingSum_female_in )
+par(mfrow=c(2,2))
+plot(temp,pred_male_out[,1],pch = 19,col=4,xlab = "Outdoor Temperature",
+     ylab = "Level of Clothing", main = "Male", ylim = c(0.38,0.65))
+lines(temp,pred_male_out[,2],col=2,lty = 2)
+lines(temp,pred_male_out[,3],col=2,lty = 2)
+legend("topright", c("Confidence Interval"), col=2,lty = 2)
+plot(temp,pred_female_out[,1],pch = 19,col=4,xlab = "Outdoor Temperature",
+     ylab = "Level of Clothing", main = "Female", ylim = c(0.38,0.65))
+lines(temp,pred_female_out[,2],col=2,lty = 2)
+lines(temp,pred_female_out[,3],col=2,lty = 2)
+
+plot(temp,pred_male_in[,1],pch = 19,col=3,xlab = "Indoor Temperature",
+     ylab = "Level of Clothing", main = "Male", ylim = c(0.38,0.65))
+lines(temp,pred_male_in[,2],col=2,lty = 2)
+lines(temp,pred_male_in[,3],col=2,lty = 2)
+
+plot(temp,pred_female_in[,1],pch = 19,col=3,xlab = "Indoor Temperature",
+     ylab = "Level of Clothing", main = "Female", ylim = c(0.38,0.65))
+lines(temp,pred_female_in[,2],col=2,lty = 2)
+lines(temp,pred_female_in[,3],col=2,lty = 2)
 
 
-pred <- predict(model8,type="response",interval = "confidence")
-par(mfrow=c(1,1))
-#plot(clothingSum$,dat$cases) ## clear increase in time
-plot(clothingSum$tOut,pred[1:n,1])
-lines(sort(clothingSum$tOut),pred[1:n,1])
 
 
 # POINT A.6 
-plot(as.numeric(clothingSum$subjId),model_final$residuals)
+par(mfrow=c(1,1))
+plot(as.numeric(clothingSum$subjId),model_final_loglik$residuals,main="Residuals of weighted optmized model", xlab="Index for sujectIDs", ylab="Residuals")
+abline(h=0,col=2,lty=1)
+abline(h=mean(model_final_loglik$residuals), col="blue",lty="dotted")
+abline(h=mean(model_final_loglik$residuals)+1.96*sqrt(var(subjectID_coef)), col="blue",lty = 2)
+abline(h=mean(model_final_loglik$residuals)-1.96*sqrt(var(subjectID_coef)), col="blue",lty = 2)
+legend(0, -0.22, legend=c("0","Mean", "95% CI"),
+       col=c("red","blue", "blue"), lty=c(1,2,2), cex=0.8)
+
 
 #################################
 # SECTION B ----
@@ -287,7 +308,7 @@ par(mfrow=c(1,1))
 plot(final_loglik_subject$coefficients)
 
 subjectID_coef <- as.numeric(c(final_loglik_subject$coefficients[5:47],final_loglik_subject$coefficients[49:50]))
-plot(subjectID_coef,main="Estimated parameters for SubjectID ",ylab="Parameter estimate", col= 2, pch=19)
+plot(subjectID_coef,main="Estimated parameters for SubjectID ",ylab="Parameter estimate",xlab="Index for SubjectID parameters", col= 2, pch=19)
 abline(h=mean(subjectID_coef), col="blue")
 abline(h=mean(subjectID_coef)+1.96*sqrt(var(subjectID_coef)), col="blue",lty = 2)
 abline(h=mean(subjectID_coef)-1.96*sqrt(var(subjectID_coef)), col="blue",lty = 2)
@@ -296,8 +317,8 @@ legend(0, -0.3, legend=c("Mean", "95% CI"),
 
 
 
-
-
+#################################
+# SECTION C ----
 
 
 
