@@ -319,7 +319,69 @@ legend(0, -0.3, legend=c("Mean", "95% CI"),
 
 #################################
 # SECTION C ----
+clothingFull<-read.csv('clothingFull.csv')
+clothingFull=clothingFull[order(clothingFull[,5],clothingFull[3]),]
 
+dataFemFull <- clothingFull[1,1:7] 
+dataMaleFull <- clothingFull[1,1:7] 
+#make a female and male data set 
+for(i in 1:length(clothingFull$X)){
+  if (clothingFull$sex[i] == 'female'){
+    dataFemFull <- rbind(dataFemFull,clothingFull[i,1:7])
+  }
+  else{
+    dataMaleFull <- rbind(dataMaleFull,clothingFull[i,1:7])
+  }
+}
+
+
+
+
+varMaleFull <- var(dataMaleFull$clo)
+varFemFull <- var(dataFemFull$clo)
+
+
+# try chisqu test to see difference -> anova(model1,model2,test="Chisq")
+
+  n <- length(clothingFull$X)
+vFull <- rep(0,n)
+for(i in 1:n){
+  if (clothingFull$sex[i] == 'male'){
+    vFull[i] = varMaleFull
+  }
+  else {
+    vFull[i] = varFemFull
+  }
+}
+
+
+# add weights to the model 
+model_fulldata <- lm((clo) ~ tInOp*sex+I(tOut^2), data = clothingFull, weights = 1/vFull)
+
+plot(model_fulldata$residuals)
+summary(model_fulldata)
+anova(model_fulldata)
+par(mfrow=c(2,2))
+plot(model_fulldata)
+
+
+n<-length(clothingFull$subjId)
+
+Function<-function(v){
+  
+  
+  model_fulldata <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingFull, weights = 1/vFull)
+  -logLik(model_fulldata)
+}
+new=optim(vFull,Function)
+
+
+
+
+model_fulloptimized <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingFull, weights = 1/new$par)
+
+
+plot(model_fulloptimized)
 
 
 
