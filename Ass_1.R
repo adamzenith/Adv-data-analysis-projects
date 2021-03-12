@@ -56,7 +56,6 @@ points(dataMale$clo,dataMale$tInOp,col=1,pch=4)
 plot(dataFem$clo,dataFem$tOut,col=2,main="Outdoor temp vs sex",pch=2)
 points(dataMale$clo,dataMale$tOut,col=1,pch=4)
 
-
 # making data factors
 clothingSum$sex = factor(clothingSum$sex)
 clothingSum$day = factor(clothingSum$day)
@@ -70,19 +69,8 @@ curve(f,0,1,lwd=3,col="red",add=T)
 rm(f)
 par(mfrow=c(1,1))
 
-# ???? NOT SURE WHAT THIS IS 
-par(mfrow=c(2,1))
-plot(clothingSum$clo~clothingSum$tOut+clothingSum$tInOp,pch=as.numeric(clothingSum$sex),
-     col=rep(c(0,1), each=50)+1)
-pairs(clothingSum, panel = panel.smooth, main = "Clothing Data")
-
 # SUMMARY OF ALL DATA 
 summary(clothingSum)
-
-library(xtable)
-library(plyr)
-dtf <- sapply(clothingSum, each(min, max, mean, sd, var, median, IQR))
-xtable(dtf)
 
 # BOX PLOTS 
 par(mfrow=c(1,3))
@@ -92,7 +80,6 @@ boxplot(clothingSum$tOut ~clothingSum$sex, col=c("firebrick2","blue"))
 
 
 # MODELS A.2
-
 # initial model
 # all possible combinations of paramters 
 model0 <- lm(clo ~ tInOp*tOut*sex, data = clothingSum)
@@ -237,7 +224,6 @@ plot(model10)
 # POINT A.5
 # make model prediction and plot for model_final
 
-
 ## PREDICTION PLOTS
 model_final <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingSum, weights = 1/v)
 pred_male_out <- predict(model_final,type="response",interval = "confidence",newdata =clothingSum_male_out )
@@ -264,7 +250,6 @@ plot(temp,pred_female_in[,1],pch = 19,col=3,xlab = "Indoor Temperature",
      ylab = "Level of Clothing", main = "Female", ylim = c(0.38,0.65))
 lines(temp,pred_female_in[,2],col=2,lty = 2)
 lines(temp,pred_female_in[,3],col=2,lty = 2)
-
 
 
 
@@ -319,7 +304,9 @@ legend(0, -0.3, legend=c("Mean", "95% CI"),
 
 #################################
 # SECTION C ----
-clothingFull<-read.csv('clothingFull.csv')
+clothingFull<-read.csv(file = '/Users/idabukhvillesen/Documents/GitHub/Adv-data-analysis-projects/clothingFull.csv')
+
+#clothingFull<-read.csv('clothingFull.csv')
 clothingFull=clothingFull[order(clothingFull[,5],clothingFull[3]),]
 
 dataFemFull <- clothingFull[1,1:7] 
@@ -333,8 +320,6 @@ for(i in 1:length(clothingFull$X)){
     dataMaleFull <- rbind(dataMaleFull,clothingFull[i,1:7])
   }
 }
-
-
 
 
 varMaleFull <- var(dataMaleFull$clo)
@@ -364,9 +349,19 @@ anova(model_fulldata)
 par(mfrow=c(2,2))
 plot(model_fulldata)
 
+#Plotting residuals
+par(mfrow=c(1,1))
+plot(as.numeric(clothingFull$subjId),model_fulldata$residuals,main="Residuals of weighted optmized model using the full dataset", xlab="Index for sujectIDs", ylab="Residuals")
+abline(h=0,col=2,lty=1)
+abline(h=mean(model_fulldata$residuals), col="blue",lty="dotted")
+abline(h=mean(model_fulldata$residuals)+1.96*sqrt(var(model_fulldata$residuals)), col="blue",lty = 2)
+abline(h=mean(model_fulldata$residuals)-1.96*sqrt(var(model_fulldata$residuals)), col="blue",lty = 2)
+legend(167, 0.4, legend=c("0","Mean", "95% CI"),
+       col=c("red","blue", "blue"), lty=c(1,2,2), cex=0.8)
+
+
 
 n<-length(clothingFull$subjId)
-
 Function<-function(v){
   
   
@@ -374,15 +369,19 @@ Function<-function(v){
   -logLik(model_fulldata)
 }
 new=optim(vFull,Function)
-
-
-
-
 model_fulloptimized <- lm(clo ~ tInOp*sex+I(tOut^2), data = clothingFull, weights = 1/new$par)
-
-
 plot(model_fulloptimized)
 
+
+par(mfrow=c(1,1))
+model_fulloptimized$col = factor(as.numeric(clothingFull$sex == "female"))
+plot(model_fulloptimized$fitted.values, model_fulloptimized$residuals, col = model_fulloptimized$col,main="Residuals of weighted optmized model using the full dataset", xlab="Fitted Values", ylab="Residuals")
+abline(h=0,col=2,lty=1)
+abline(h=mean(model_fulldata$residuals), col="blue",lty="dotted")
+abline(h=mean(model_fulldata$residuals)+1.96*sqrt(var(model_fulldata$residuals)), col="blue",lty = 2)
+abline(h=mean(model_fulldata$residuals)-1.96*sqrt(var(model_fulldata$residuals)), col="blue",lty = 2)
+legend('bottomleft', legend=c("Male","Female"),
+       col=c("black","red"), pch=c(1,1), cex=0.8)
 
 
 
