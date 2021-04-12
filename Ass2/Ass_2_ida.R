@@ -191,13 +191,16 @@ summary ( model6.1 )
 Anova ( model6.1, type = 'II' )
 par ( mfrow =c(2 ,2))
 plot ( model6.1 )
-
+library(MASS)
 # quantative test 
 logLik(model0.glm)
 logLik(model6.1)
 AIC(model0.glm, model6)
-
+par(mfrow=c(1,1))
+boxcox(model5)
 ## IS THE GAUSSIAN GLM / LM REALLY BETTER??? 
 
-
+par(mfrow=c(2,2))
+plot(model6)
+plot(model0.glm)
 
