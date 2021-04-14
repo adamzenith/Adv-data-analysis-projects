@@ -16,15 +16,17 @@ fan.data$TSV <- factor(fan.data$TSV)
 coTable = table(fan.data$TSV,fan.data$fanSpeed) #contingency 
 chisq.test(table(fan.data$TSV,fan.data$fanSpeed)) #low p-value -> independent
 fisher.test(fan.data$TSV,fan.data$fanSpeed)
-cramerV(coTable,bias.correct =TRUE,conf = 0.95,ci=T)
+cramerV(coTable,bias.correct =TRUE)
 0.# MAKE MODELS WITH ORDINAL PACKAGE 
 # ordinal variables (ranked data, distance between values not known)
 model0.clm <- clm( TSV ~ fanSpeed, data = fan.data )
-model0.clm 
+summary(model0.clm) #
 model0f.clm <- clm( TSV ~ fanSpeed.f, data = fan.data )
-model0f.clm
-Anova(model0.clm,type = 'II') 
+summary(model0f.clm)
+
+#Anova(model0.clm,type = 'II') 
 anova(model0f.clm)
+anova(model0.clm)
 anova(model0f.clm,model0.clm) #independence not assumed 
 par(mfrow=c(2,2))
 plot(model0.clm)
@@ -34,3 +36,8 @@ model1f.clm
 anova(model1f.clm) 
 anova(model1f.clm,model0f.clm) # new model is better, both AIC and LogLik wise 
 
+x=predict(model0.clm,data=1:20)
+plot(predict(model1f.clm)$fit)
+plot(fan.data$TSV)
+
+boxplot(fan.data$TSV ~fan.data$fanSpeed, col=2:6, xlab = "TSV", ylab = "Fan Speed")
