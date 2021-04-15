@@ -4,7 +4,10 @@
 library(ordinal)
 library(rcompanion)
 library(car)
-
+library(effects)
+library(MASS)
+library(usingR)
+require(gridExtra)
 ### LOAD DATA 
 fan.data <- read.table(file ='C:/Users/matth/Documents/GitHub/Adv-data-analysis-projects/Ass2/CeilingFan.csv', sep = ";")
 
@@ -40,4 +43,19 @@ x=predict(model0.clm,data=1:20)
 plot(predict(model1f.clm)$fit)
 plot(fan.data$TSV)
 
+#Plots
 boxplot(fan.data$TSV ~fan.data$fanSpeed, col=2:6, xlab = "TSV", ylab = "Fan Speed")
+
+
+plot2 = plot(Effect("fanSpeed.f",model1f.clm))
+plot1 = plot(Effect("fanType.f",model1f.clm))
+grid.arrange(plot1, plot2, ncol=2)
+
+plot2 = plot(Effect("fanSpeed.f",model1f.clm),multiline=2)
+plot1 = plot(Effect("fanType.f",model1f.clm),multiline=2)
+grid.arrange(plot1, plot2, ncol=2)
+
+plot2 = plot(Effect("fanSpeed.f",model1f.clm),style="stacked")
+plot1 = plot(Effect("fanType.f",model1f.clm),style="stacked")
+grid.arrange(plot1, plot2, ncol=2)
+
