@@ -55,6 +55,7 @@ clothing$sex <- factor(clothing$sex)
 #clothing$clo <- factor(clothing$clo)
 clothing$bin<-cbind(clothing$clo,clothing$nobs-clothing$clo)
 model0.glm<- glm( cbind(clo,nobs-clo) ~ time+sex+tOut+tInOp , family = binomial(), data = clothing )
+model0.glm
 summary ( model0.glm)
 Anova ( model0.glm, type = 'III' ) 
 par ( mfrow =c(2 ,2))
@@ -65,7 +66,7 @@ plot(model0.glm)
 
 # FEMALE
 
-model1.fem<- glm( cbind(clo,nobs-clo) ~ tOut*tInOp, weights = nobs , family = binomial(), data = dataFem )
+model1.fem<- glm( cbind(clo,nobs-clo) ~ tOut*tInOp , weights = nobs,family = binomial(), data = dataFem )
 summary ( model1.fem)
 Anova ( model1.fem, type = 'III' ) 
 par ( mfrow =c(2 ,2))
@@ -157,69 +158,6 @@ AIC(model1.mal, model2.mal,model1.mal.poi, model2.mal.poi)
 #####################################
 #####################################
 
-
-model3.fem<- glm( cbind(clo,nobs-clo) ~ tOut:tInOp+nobs , family = binomial(), data = dataFem )
-summary ( model3.fem)
-Anova ( model3.fem, type = 'III' ) 
-par ( mfrow =c(2 ,2))
-plot(model3.fem)
-
-model4.fem<- glm( cbind(clo,nobs-clo) ~ nobs , family = binomial(), data = dataFem )
-summary ( model4.fem)
-Anova ( model4.fem, type = 'III' ) 
-par ( mfrow =c(2 ,2))
-plot(model4.fem)
-
-
-
-
-
-model2.glm<- glm( cbind(clo,nobs-clo) ~ tOut*tInOp+nobs , family = binomial(), data = dataMale )
-summary ( model2.glm)
-Anova ( model2.glm, type = 'III' ) 
-par ( mfrow =c(2 ,2))
-plot(model2.glm)
-
-
-
-
-
-model1.glm.m<- glm( cbind(clo,nobs-clo) ~ tOut+tInOp , family = binomial(), data = clothing[clothing$sex=='male',] )
-
-summary ( model1.glm.m)
-Anova ( model1.glm.m, type = 'II' ) 
-par ( mfrow =c(2 ,2))
-plot(model1.glm.m)
-
-model1.glm.f<- glm( cbind(clo,nobs-clo) ~ tOut+tInOp , family = binomial(), data = clothing[clothing$sex=='female',] )
-summary ( model1.glm.f)
-Anova ( model1.glm.f, type = 'II' ) 
-par ( mfrow =c(2 ,2))
-plot(model1.glm.f)
-
-model2.glm<- glm( cbind(clo,nobs-clo) ~ sex+tInOp , family = binomial(), data = clothing )
-summary ( model2.glm)
-Anova ( model2.glm, type = 'II' ) 
-par ( mfrow =c(2 ,2))
-plot(model2.glm)
-
-model3.glm<- glm( cbind(clo,nobs-clo) ~ sex+tOut+tInOp , family = binomial(), data = clothing )
-summary ( model3.glm)
-Anova ( model3.glm, type = 'II' ) 
-par ( mfrow =c(2 ,2))
-plot(model3.glm)
-
-
-model0.glm<- glm( clo ~ time+nobs+sex+tOut+tInOp , family = poisson(link = "log"), data = clothing )
-summary ( model0.glm)
-Anova ( model0.glm, type = 'II' ) 
-
-
-par ( mfrow =c(2 ,2))
-plot(model0.glm)
-
-#####################################
-#####################################
 
 
 
