@@ -18,7 +18,7 @@ clothing <- read.table(file= "~/Documents/Studie/Mst-Sem2-2021/Advanced Data Ana
 par ( mfrow =c(2 ,1))
 interaction.plot(clothing$clo, clothing$sex, clothing$tInOp, xlab = 'Times Changed', ylab = 'Temperature Indoor', main= '')
 interaction.plot(clothing$clo, clothing$sex, clothing$tOut, xlab = 'Times Changed', ylab = 'Temperature Outdoor', main= '')
-
+par ( mfrow =c(1 ,1))
 
 # SEPERATING DATA BETWEEN MALE AND FEMALE
 clothing$isFemale <- (clothing$sex) 
@@ -73,7 +73,7 @@ model0.glm<- glm( cbind(clo,nobs-clo) ~ sex*tOut*tInOp , weights = nobs, family 
 model0.glm
 summary ( model0.glm, test = 'Chisq')
 Anova ( model0.glm, type = 'III' ) 
-par ( mfrow =c(1 ,2))
+par ( mfrow =c(2 ,2))
 plot(model0.glm)
 
 ## should we use quasibinomial or binomial??
@@ -91,7 +91,7 @@ model2.glm<- glm( cbind(clo,nobs-clo) ~ sex:tOut:tInOp+tOut:tInOp+sex:tOut+tOut+
 model2.glm
 summary ( model2.glm, test = 'Chisq')
 Anova ( model2.glm, type = 'III' ) 
-par ( mfrow =c(1 ,2))
+par ( mfrow =c(2 ,2))
 plot(model2.glm)
 
 
@@ -100,7 +100,7 @@ anova (model0.glm, model1.glm, test='Chisq')
 anova (model1.glm, model2.glm, test='Chisq')
 anova (model0.glm, model2.glm, test='Chisq')
 
-xtable(AIC(model0.glm, model1.glm, model2.glm))
+(AIC(model0.glm, model1.glm, model2.glm))
 
 ############# Poisson Distribution ########################
 ###########################################################
@@ -116,7 +116,7 @@ model1.poi<- glm( clo ~ sex:tOut:tInOp+tOut:tInOp+sex:tOut+tInOp+tOut+sex, weigh
 summary ( model1.poi)
 Anova ( model1.poi, type = 'III' ) 
 par ( mfrow =c(2 ,2))
-plot(model1.poi) ## remove sex:tInOp
+plot(model1.poi) ## remove tInOp
 
 model2.poi<- glm( clo ~ sex:tOut:tInOp+tOut:tInOp+sex:tOut+tOut+sex, weights = nobs , family = poisson(), data = clothing )
 summary ( model2.poi)
@@ -133,25 +133,26 @@ AIC(model0.poi, model1.poi, model2.poi)
 
 ### With an off-set #####
 
+# Before the off-set, non of them are significant 
 model3.poi<- glm( clo ~ sex*tOut*tInOp+offset(log(clothing$nobs)), family = poisson(link = 'log'), data = clothing )
 summary ( model3.poi)
 Anova ( model3.poi, type = 'III' ) 
 par ( mfrow =c(2 ,2))
 plot(model3.poi) ## remove tInOp:sex
 
-model4.poi<- glm( clo ~ sex:tOut:tInOp+sex+tInOp+tOut+tInOp:tOut+tOut:sex+ offset(logsex), family = poisson(link = 'log'), data = clothing )
+model4.poi<- glm( clo ~ sex:tOut:tInOp+sex+tInOp+tOut+tInOp:tOut+tOut:sex+ offset(log(clothing$nobs)), family = poisson(link = 'log'), data = clothing )
 summary ( model4.poi)
 Anova ( model4.poi, type = 'III' ) 
 par ( mfrow =c(2 ,2))
 plot(model4.poi) ## remove tInOp:sex
 
-model5.poi<- glm( clo ~ sex:tOut:tInOp+sex+tOut+tInOp:tOut+tOut:sex+ offset(logsex), family = poisson(link = 'log'), data = clothing )
+model5.poi<- glm( clo ~ sex:tOut:tInOp+sex+tOut+tInOp:tOut+tOut:sex+offset(log(clothing$nobs)), family = poisson(link = 'log'), data = clothing )
 summary ( model5.poi)
 Anova ( model5.poi, type = 'III' ) 
 par ( mfrow =c(2 ,2))
 plot(model5.poi) ## remove tInOp
 
-model6.poi<- glm( clo ~ sex:tOut:tInOp+ offset(logsex), family = poisson(link = 'log'), data = clothing )
+model6.poi<- glm( clo ~ sex:tOut:tInOp+ offset(log(clothing$nobs)), family = poisson(link = 'log'), data = clothing )
 summary ( model6.poi)
 Anova ( model6.poi, type = 'III' ) 
 par ( mfrow =c(2 ,2))
