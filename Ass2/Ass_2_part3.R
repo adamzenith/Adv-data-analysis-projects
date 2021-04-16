@@ -59,3 +59,4 @@ plot2 = plot(Effect("fanSpeed.f",model1f.clm),style="stacked")
 plot1 = plot(Effect("fanType.f",model1f.clm),style="stacked")
 grid.arrange(plot1, plot2, ncol=2)
 
+
