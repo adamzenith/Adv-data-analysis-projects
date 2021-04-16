@@ -2,8 +2,12 @@
 # Load data 
 # _________________
 
+library(ISwR)
 library(MASS)
 library(dplyr)
+library(car)
+library(ordinal)
+library(rcompanion)
 library(car)
 
 #clothing <- read.table(file = '/Users/idabukhvillesen/Dropbox/8 SEMESTER/Adv. Data Ana. & Stat. Mod./Assignments/Assignment 2/dat_count.csv', sep = ";")
@@ -46,23 +50,115 @@ points(dataMale$clo,dataMale$tInOp,col=1,pch=4)
 legend("bottomright", legend=c("Female", "Male"),
        pch= c(2,4), col=c(2,1), cex=0.8)
 
+par ( mfrow =c(1 ,1))
 boxplot(clothing$clo ~clothing$sex, col=2:6, xlab = "Sex", ylab = "Clothing Changes")
 
+
+coTable = table(clothing$clo, clothing$sex) #contingency
+xtable(coTable)
+chisq.test(coTable) #low p-value -> independent
+fisher.test(clothing$clo, clothing$sex)
+cramerV(coTable,bias.correct =TRUE)
+
+
+############# Binomial Distribution #######################
+###########################################################
 
 clothing$sex <- factor(clothing$sex)
 #clothing$nobs <- factor(clothing$nobs)
 #clothing$clo.adj <- factor(clothing$clo.adj)
 #clothing$clo <- factor(clothing$clo)
 clothing$bin<-cbind(clothing$clo,clothing$nobs-clothing$clo)
-model0.glm<- glm( cbind(clo,nobs-clo) ~ time+sex+tOut+tInOp , family = binomial(), data = clothing )
+model0.glm<- glm( cbind(clo,nobs-clo) ~ sex*tOut*tInOp , weights = nobs, family = binomial(link='logit'), data = clothing )
 model0.glm
-summary ( model0.glm)
+summary ( model0.glm, test = 'Chisq')
 Anova ( model0.glm, type = 'III' ) 
-par ( mfrow =c(2 ,2))
+par ( mfrow =c(1 ,2))
 plot(model0.glm)
 
-############# Binomial Distribution #######################
+## should we use quasibinomial or binomial??
+# remove sex:tInOp
+
+model1.glm<- glm( cbind(clo,nobs-clo) ~ sex:tOut:tInOp+tOut:tInOp+sex:tOut+tInOp+tOut+sex , weights = nobs, family = binomial(link='logit'), data = clothing )
+model1.glm
+summary ( model1.glm, test = 'Chisq')
+Anova ( model1.glm, type = 'III' ) 
+par ( mfrow =c(2 ,2))
+plot(model1.glm)
+
+
+model2.glm<- glm( cbind(clo,nobs-clo) ~ sex:tOut:tInOp+tOut:tInOp+sex:tOut+tOut+sex , weights = nobs, family = binomial(link='logit'), data = clothing )
+model2.glm
+summary ( model2.glm, test = 'Chisq')
+Anova ( model2.glm, type = 'III' ) 
+par ( mfrow =c(1 ,2))
+plot(model2.glm)
+
+
+
+anova (model0.glm, model1.glm, test='Chisq')
+anova (model1.glm, model2.glm, test='Chisq')
+anova (model0.glm, model2.glm, test='Chisq')
+
+xtable(AIC(model0.glm, model1.glm, model2.glm))
+
+############# Poisson Distribution ########################
 ###########################################################
+
+model0.poi<- glm( clo ~ sex*tOut*tInOp, weights = nobs , family = poisson(), data = clothing )
+summary ( model0.poi)
+Anova ( model0.poi, type = 'III' ) 
+par ( mfrow =c(2 ,2))
+plot(model0.poi) ## remove sex:tInOp
+
+
+model1.poi<- glm( clo ~ sex:tOut:tInOp+tOut:tInOp+sex:tOut+tInOp+tOut+sex, weights = nobs , family = poisson(), data = clothing )
+summary ( model1.poi)
+Anova ( model1.poi, type = 'III' ) 
+par ( mfrow =c(2 ,2))
+plot(model1.poi) ## remove sex:tInOp
+
+model2.poi<- glm( clo ~ sex:tOut:tInOp+tOut:tInOp+sex:tOut+tOut+sex, weights = nobs , family = poisson(), data = clothing )
+summary ( model2.poi)
+Anova ( model2.poi, type = 'III' ) 
+par ( mfrow =c(2 ,2))
+plot(model2.poi) ## remove tInOp
+
+
+anova (model0.poi, model1.poi, test='Chisq')
+anova (model1.poi, model2.poi, test='Chisq')
+anova (model0.poi, model2.poi, test='Chisq')
+
+AIC(model0.poi, model1.poi, model2.poi)
+
+### With an off-set #####
+
+model3.poi<- glm( clo ~ sex*tOut*tInOp+offset(log(clothing$nobs)), family = poisson(link = 'log'), data = clothing )
+summary ( model3.poi)
+Anova ( model3.poi, type = 'III' ) 
+par ( mfrow =c(2 ,2))
+plot(model3.poi) ## remove tInOp:sex
+
+model4.poi<- glm( clo ~ sex:tOut:tInOp+sex+tInOp+tOut+tInOp:tOut+tOut:sex+ offset(logsex), family = poisson(link = 'log'), data = clothing )
+summary ( model4.poi)
+Anova ( model4.poi, type = 'III' ) 
+par ( mfrow =c(2 ,2))
+plot(model4.poi) ## remove tInOp:sex
+
+model5.poi<- glm( clo ~ sex:tOut:tInOp+sex+tOut+tInOp:tOut+tOut:sex+ offset(logsex), family = poisson(link = 'log'), data = clothing )
+summary ( model5.poi)
+Anova ( model5.poi, type = 'III' ) 
+par ( mfrow =c(2 ,2))
+plot(model5.poi) ## remove tInOp
+
+model6.poi<- glm( clo ~ sex:tOut:tInOp+ offset(logsex), family = poisson(link = 'log'), data = clothing )
+summary ( model6.poi)
+Anova ( model6.poi, type = 'III' ) 
+par ( mfrow =c(2 ,2))
+plot(model6.poi) ## remove tInOp
+
+
+############## Binomial Distribution - by gender ################################
 
 # FEMALE
 
@@ -114,7 +210,7 @@ plot(dataMale$clo,dataMale$tOut,col='red')
 plot(dataFem$clo,dataFem$tInOp,col='blue')
 plot(dataFem$clo,dataFem$tOut,col='blue')
 
-############# Poisson Distribution ########################
+############# Poisson Distribution - by gender ############
 ###########################################################
 
 # FEMALE
@@ -155,8 +251,7 @@ logLik(model2.mal.poi)
 AIC(model1.mal, model2.mal,model1.mal.poi, model2.mal.poi)
 
 
-#####################################
-#####################################
+
 
 
 
