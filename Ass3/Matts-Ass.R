@@ -25,3 +25,9 @@ library(nlme)
 fit<-lme(clo~tOut+tInOp, random = ~1|sex, data=clo)
 summary(fit)
 plot(fit)
+
+
+
+#Part 2-------
+library(lme4)
+fit0 <- lmer(clo~sex+(1|subjId),data=clo,REML=FALSE)
