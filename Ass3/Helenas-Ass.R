@@ -41,7 +41,7 @@ clothing = Clothing$clo
 # Density plot of Clo: 
 f<-function(x){dnorm(x,mean=mean(clothing,na.rm=T),
                      sd=sd(clothing,na.rm=T))} 
-hist(clothing,xlab='Clothing',probability=T)
+hist(clothing,xlab='Clothing',probability=T,xlim = c(0,1))
 curve(f,0,1,lwd=3,col="red",add=T) 
 rm(f)
 

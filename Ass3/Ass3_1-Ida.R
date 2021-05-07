@@ -7,7 +7,7 @@ library(nlme)
 library(car)
 
 #setwd('/Users/idabukhvillesen/Dropbox/8 SEMESTER/Adv. Data Ana. & Stat. Mod./Assignments/Assignment 3')
-setwd("~/Documents/GitHub/Adv-data-analysis-projects/Ass3") #Helena directory
+#setwd("~/Documents/GitHub/Adv-data-analysis-projects/Ass3") #Helena directory
 
 clothing <- read.table(file = 'clothingFullAss03.csv', sep = ",",header=TRUE)
 
@@ -100,8 +100,16 @@ summary(lme.9)
 Anova(lme.9,type ='III')
 plot(lme.9)
 # the residuals still look very strange - quite varying +-2.
+library('gridExtra')
+p1 <- plot(lme.8,ylim=c(-3,3.5),xlim = c(0,1),main = "Non weighted")
+p2 <- plot(lme.9,ylim=c(-3,3.5),xlim = c(0,1),main = "Weighted")
+grid.arrange(p1,p2,ncol=2)
+par(mfrow=c(1,2))
+qqnorm(lme.8$residuals)
+qqline(lme.8$residuals)
 
-
+qqnorm(lme.9$residuals)
+qqline(lme.9$residuals)
 
 # Fit mixed effects models that use subjId and day as a random effect ----
 
