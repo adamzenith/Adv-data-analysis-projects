@@ -69,7 +69,7 @@ anova(model2)
 summary(model2)
 plot(model2)
 
-model3 <- lme(clo ~ tOut+ tOut*sex+sex+tOut*day+day, random= ~ 1|subjId, data=Clothing, method="REML")
+model3 <- lme(clo ~ tOut*sex+tOut*day, random= ~ 1|subjId, data=Clothing, method="REML")
 logLik(model3)
 anova(model3)
 summary(model3)
@@ -80,11 +80,40 @@ plot(model3)
 
 ## Mixed Effect Model that 
 
-model3 <- lme(clo ~ tOut+ tOut*sex+sex+tOut*day+day, random= ~ 1|subjId, data=Clothing, method="REML")
+model3 <- lme(clo ~ tInOp*sex+ tOut*sex+tOut*tInOp, random= ~ 1|subjId/day, data=Clothing, method="REML")
 logLik(model3)
 anova(model3)
 summary(model3)
 plot(model3)
+# add weights as their is dispersion in the end of the residuals
+
+model4 <- lme(clo ~ tInOp*sex+ tOut*sex, random= ~ 1|subjId/day, data=Clothing, method="REML")
+logLik(model4)
+anova(model4)
+summary(model4)
+plot(model4)
 
 
+model5 <- lme(clo ~ tInOp*sex+ tOut, random= ~ 1|subjId/day, data=Clothing, method="REML")
+logLik(model5)
+anova(model5)
+summary(model5)
+plot(model5)
+
+## Q.4 - model including within day auto-correlation 
+# (repeated measurement set up), with subDay as random effect, you should only 
+# consider random intercepts in these models.
+
+
+
+fit.exp<- lme(clo ~ tInOp+sex+ tOut,random=~1|subDay,
+                correlation=corExp(form=~1|subDay),
+                data=Clothing,
+                method="ML")
+logLik(fit.exp)
+
+plot(Variogram(fit.exp), main='Exp')
+
+plot(fit.exp)
+qqnorm(fit.exp)
 
