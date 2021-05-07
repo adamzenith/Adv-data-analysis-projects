@@ -1,12 +1,12 @@
-clothing = read.csv("clothingFullAss03.csv", header=TRUE, na.strings="?")
+clo = read.csv("clothingFullAss03.csv", header=TRUE, na.strings="?")
 
-summary(clo)
+summary(clothoing)
 
 #Plotting female stuff----
-par(mfrow=c(1,2))
-plot(clo$clo[clo$subjId==0 & clo$sex=="female"],ylim=c(0,1))
+par(mfrow=c(1,3))
+plot(clo$clo[clo$subjId==24],ylim=c(0,1),main = "Subject 24",ylab="Clothing Level",xlab="Observation" )
 for(i in 1:46){
-  points(clo$clo[clo$subjId==i & clo$sex=="female"],col=i+1)
+  plot(clo$clo[clo$subjId==i & clo$sex=="female"],col=i+1)
 }
 
 #Plotting male stuff----
