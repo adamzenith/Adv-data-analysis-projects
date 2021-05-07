@@ -3,6 +3,7 @@
 ## part 1
 
 require(plotrix)
+library(nlme)
 
 setwd('/Users/idabukhvillesen/Dropbox/8 SEMESTER/Adv. Data Ana. & Stat. Mod./Assignments/Assignment 3')
 
@@ -39,7 +40,7 @@ legend("topright", legend = c("Female","Male"),col=c("lightpink1","cadetblue1"),
 
 # Fit mixed effects models that use subjId as a random effect ----
 
-library(nlme)
+
 lme.1 <- lme(clo ~ factor(sex), random = ~1|subjId, data=clothing)
 summary(lme.1)
 anova(lme.1)
@@ -75,10 +76,26 @@ plot(lme.6)
 
 
 
+# Fit mixed effects models that use subjId and day as a random effect ----
+
+lme.11 <- lme(clo ~ factor(sex), random = ~ 1|subjId/day, data=clothing)
+summary(lme.11)
+anova(lme.11)
+plot(lme.11)
 
 
 
 
+# Fit mixed effects models that use autocorrelation ----
+
+## by using subDay, we remove the factor day and subjID in this way 
+
+model <- lme(clo ~ factor(sex), random = ~ 1|subDay,
+              correlation = corExp(form = ~1|subDay), data = clothing)
+
+model
+
+plot(Variogram(model), main='Exp')
 
 
 
