@@ -69,7 +69,7 @@ anova(model2)
 summary(model2)
 plot(model2)
 
-model3 <- lme(clo ~ tOut*sex+tOut*day, random= ~ 1|subjId, data=Clothing, method="REML")
+model3 <- lme(clo ~ tOut*sex+tOut*day+time, random= ~ 1|subjId, data=Clothing, method="REML")
 logLik(model3)
 anova(model3)
 summary(model3)
@@ -99,6 +99,12 @@ logLik(model5)
 anova(model5)
 summary(model5)
 plot(model5)
+
+model6 <- lme(clo ~ tInOp*sex+ tOut,weights=~var, random= ~ 1|subjId/day, data=Clothing, method="REML")
+logLik(model6)
+anova(model6)
+summary(model6)
+plot(model6)
 
 ## Q.4 - model including within day auto-correlation 
 # (repeated measurement set up), with subDay as random effect, you should only 
