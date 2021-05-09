@@ -92,7 +92,7 @@ clothing$var<-clothing$clo
 for(i in 1:length(clothing$var)){
   clothing$var[i]=var(clothing$clo[clothing$subjId==clothing$subjId[i]])
 }
-
+clothing$var = Clothing$var
 # FINAL MODEL
 lme.9 <- lme(clo ~    time + tOut*factor(day) + tInOp*factor(sex), random = ~1|subjId,
              weights = ~var, data=clothing)
@@ -145,19 +145,37 @@ plot(lme.12)
 # Fit mixed effects models that use autocorrelation ----
 
 ## by using subDay, we remove the factor day and subjID in this way 
-
+par(mfrow=c(1,1))
 fit.exp<- lme(clo ~ tInOp+factor(sex)+ tOut,random=~1|subDay,
               correlation=corExp(form=~1|subDay),
               data=clothing,
               method="ML")
 logLik(fit.exp)
-
-plot(Variogram(fit.exp), main='Exp')
-
-
+anova(fit.exp)
+p1 = plot(Variogram(fit.exp), main='Exponential')
 
 
 
+fit.exp<- lme(clo ~ tInOp+factor(sex)+ tOut,random=~1|subDay,
+              correlation=corGaus(form=~1|subDay),
+              data=clothing,
+              method="ML")
+logLik(fit.exp)
+p2 = plot(Variogram(fit.exp), main='Gaussian')
 
+fit.exp<- lme(clo ~ tInOp+factor(sex)+ tOut,random=~1|subDay,
+                                                  correlation=corLin(form=~1|subDay),
+                                                  data=clothing,
+                                                  method="ML")
+logLik(fit.exp)
+p3 = plot(Variogram(fit.exp), main='Linear')
+
+library('gridExtra')
+
+grid.arrange(p1,p2,p3,ncol=3)
+
+
+qqnorm(fit.exp$residuals)
+qqline(fit.exp$residuals)
 
 
