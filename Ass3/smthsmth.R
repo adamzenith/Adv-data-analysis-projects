@@ -9,7 +9,7 @@ library(gclus)
 library(stats)
 library(emmeans)
 
-setwd("~/Documents/Studie/Mst-Sem2-2021/Advanced Data Analysis and Stastitical Modelling/Assignment 3")
+#setwd("~/Documents/Studie/Mst-Sem2-2021/Advanced Data Analysis and Stastitical Modelling/Assignment 3")
 
 Clothing = read.csv('clothingFullAss03.csv')
 
@@ -114,17 +114,22 @@ for(i in 1:length(Clothing$var)){
 
 
 optimize = function(vars){
-  for(i in 1:length(Clothing$var)){
-    Clothing$var[i]=means$var[means$subjId==Clothing$subjId[i]]
-  }
-  print(Clothing$var)
+  #for(i in 1:length(Clothing$var)){
+  #  Clothing$var[i]=means$var[means$subjId==Clothing$subjId[i]]
+  #}
+  #print(i)
+  
+  Clothing$var = vars
+  #print(Clothing$var)
   ########################### Insert model here
   model3 <- lme(clo ~ tOut*sex+tOut*day, random= ~ 1|subjId, data=Clothing, method="REML",weights = ~1/var)
   ###########################
   -logLik(model3)
 }
 varr=means$var
+i=0
 opt = optim(varr,optimize)
+
 ## Mixed Effect Model that 
 
 model3 <- lme(clo ~ tInOp*sex+ tOut*sex+tOut*tInOp, random= ~ 1|subjId/day, data=Clothing, method="REML")
