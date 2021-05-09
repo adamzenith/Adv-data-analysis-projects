@@ -37,7 +37,6 @@ nll.0 <- function(theta,dat,X) {
     
       likelihood = log(1/((2*pi)^(n_i/2)*sqrt(det(V_i)))*exp(-0.5*t(y_i-mu_i)%*%solve(V_i)%*%(y_i-mu_i)))
       L = L - likelihood 
-    
     }
     
     # output Likelihood  
@@ -59,8 +58,6 @@ fit0
 
 ## Test result 
 fit1 <- lmer(clo~sex+(1|subjId)+(1|subjId:day),data=clothing,REML=FALSE)
-
-
 
 nll.1 <- function(theta,dat,X) { 
   
@@ -114,10 +111,8 @@ fit.nll.1
 sqrt(exp(fit.nll.1$par[3:5]))
 fit1
 
-
 #####################
 ### 1.3
-
 
 nll.3 <- function(theta,dat,X) { 
   
@@ -180,6 +175,16 @@ fit.nll.3
 sqrt(exp(fit.nll.3$par[3:5]))
 fit.nll.3$par[6:7]
 fit1
+
+
+
+
+
+
+
+
+
+
 
 
 

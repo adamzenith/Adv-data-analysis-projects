@@ -30,9 +30,9 @@ for(i in 0:no.persons){
   }
 }
 
-plotCI(persons[clo.sex==1],clo.mean[clo.sex==1],uiw=clo.std[clo.sex==1],liw= clo.std[clo.sex==1], col="lightpink1",xlab="Subject ID",ylab="Clothing",main="Average clothing for the Subjects")
-plotCI(persons[clo.sex==0],clo.mean[clo.sex==0],uiw=clo.std[clo.sex==0],liw= clo.std[clo.sex==0], col="lightskyblue1",add=TRUE)
-legend("topright", legend = c("Female","Male"),col=c("lightpink1","cadetblue1"), pch=c(1,1),cex=0.85)
+plotCI(persons[clo.sex==1],clo.mean[clo.sex==1],uiw=clo.std[clo.sex==1],liw= clo.std[clo.sex==1], col="red",xlab="Subject ID",ylab="Clothing",main="Average clothing for the Subjects")
+plotCI(persons[clo.sex==0],clo.mean[clo.sex==0],uiw=clo.std[clo.sex==0],liw= clo.std[clo.sex==0], col="blue",add=TRUE)
+legend("topright", legend = c("Female","Male"),col=c("red","blue"), pch=c(1,1),cex=0.85)
 
 
 
