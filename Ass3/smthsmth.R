@@ -41,7 +41,7 @@ clothing = Clothing$clo
 # Density plot of Clo: 
 f<-function(x){dnorm(x,mean=mean(clothing,na.rm=T),
                      sd=sd(clothing,na.rm=T))} 
-hist(clothing,xlab='Clothing',probability=T,xlim = c(0,1))
+hist(clothing,xlab='Clothing',probability=T)
 curve(f,0,1,lwd=3,col="red",add=T) 
 rm(f)
 
@@ -49,10 +49,14 @@ rm(f)
 
 ## Mixed Effect Model that use subjId as a random effect ####
 
+#weights
+
+#
+
 Clothing$sex = factor(Clothing$sex)
 Clothing$day = factor(Clothing$day)
-
-model0 <- lme(clo ~ tOut*tInOp*sex, random= ~ 1|subjId, data=Clothing, method="REML")
+par(mfrow=c(2,2))
+model0 <- lme(clo ~ tOut*tInOp*sex+day, random= ~ 1|subjId, data=Clothing, method="REML")
 logLik(model0)
 anova(model0)
 summary(model0)
@@ -69,7 +73,7 @@ anova(model2)
 summary(model2)
 plot(model2)
 
-model3 <- lme(clo ~ tOut*sex+tOut*day+time, random= ~ 1|subjId, data=Clothing, method="REML")
+model3 <- lme(clo ~ tOut*sex+tOut*day, random= ~ 1|subjId, data=Clothing, method="REML")#,weights = ~var)
 logLik(model3)
 anova(model3)
 summary(model3)
@@ -77,7 +81,50 @@ plot(model3)
 # add weights as their is dispersion in the end of the residuals
 
 
+varmale=var(Clothing$clo[Clothing$sex=="male"])
+varfemale=var(Clothing$clo[Clothing$sex=="female"])
+Clothing$var<-Clothing$clo
+for(i in 1:length(Clothing$var)){
+  if(Clothing$sex[i]=="male"){
+    Clothing$var[i] = varmale
+  }
+  else{
+    Clothing$var[i] = varfemale
+  }
+}
 
+
+Clothing$var<-Clothing$clo
+for(i in 1:length(Clothing$var)){
+  Clothing$var[i]=var(Clothing$clo[Clothing$subjId==Clothing$subjId[i]])
+}
+means=aggregate(var ~ subjId, data=Clothing,FUN=mean)
+
+Clothing$var<-Clothing$clo
+for(i in 1:length(Clothing$var)){
+  if(Clothing$sex[i]=="male"){
+    Clothing$var[i] = var(Clothing$clo[Clothing$day==Clothing$day[i] & Clothing$sex=="male"])
+  }
+  else{
+    Clothing$var[i] = var(Clothing$clo[Clothing$day==Clothing$day[i] & Clothing$sex=="female"])
+  }
+}
+
+
+
+
+optimize = function(vars){
+  for(i in 1:length(Clothing$var)){
+    Clothing$var[i]=means$var[means$subjId==Clothing$subjId[i]]
+  }
+  print(Clothing$var)
+  ########################### Insert model here
+  model3 <- lme(clo ~ tOut*sex+tOut*day, random= ~ 1|subjId, data=Clothing, method="REML",weights = ~1/var)
+  ###########################
+  -logLik(model3)
+}
+varr=means$var
+opt = optim(varr,optimize)
 ## Mixed Effect Model that 
 
 model3 <- lme(clo ~ tInOp*sex+ tOut*sex+tOut*tInOp, random= ~ 1|subjId/day, data=Clothing, method="REML")
@@ -94,17 +141,11 @@ summary(model4)
 plot(model4)
 
 
-model5 <- lme(clo ~ tInOp*sex+ tOut, random= ~ 1|subjId/day, data=Clothing, method="REML")
+model5 <- lme(clo ~ tInOp*sex+ tOut, random= ~ 1|subjId/day, data=Clothing, method="REML",weights=~var)
 logLik(model5)
 anova(model5)
 summary(model5)
 plot(model5)
-
-model6 <- lme(clo ~ tInOp*sex+ tOut,weights=~var, random= ~ 1|subjId/day, data=Clothing, method="REML")
-logLik(model6)
-anova(model6)
-summary(model6)
-plot(model6)
 
 ## Q.4 - model including within day auto-correlation 
 # (repeated measurement set up), with subDay as random effect, you should only 
@@ -113,9 +154,9 @@ plot(model6)
 
 
 fit.exp<- lme(clo ~ tInOp+sex+ tOut,random=~1|subDay,
-                correlation=corExp(form=~1|subDay),
-                data=Clothing,
-                method="ML")
+              correlation=corExp(form=~1|subDay),
+              data=Clothing,
+              method="ML")
 logLik(fit.exp)
 
 plot(Variogram(fit.exp), main='Exp')
