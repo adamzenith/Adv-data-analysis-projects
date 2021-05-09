@@ -154,6 +154,21 @@ logLik(fit.exp)
 
 plot(Variogram(fit.exp), main='Exp')
 
+ano <- lme(clo ~ factor(sex), random = ~1|subDay, data = clothing)
+ano <- update(ano, correlation = corCompSymm(form = ~1|subDay))
+
+
+# helena 
+fit.exp<- lme(clo ~ 1,random=~1|subDay,
+              correlation=corExp(form=~1|subDay),
+              data=Clothing,
+              method="ML")
+logLik(fit.exp)
+
+plot(Variogram(fit.exp), main='Exp')
+
+plot(fit.exp)
+qqnorm(fit.exp)
 
 
 
