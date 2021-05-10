@@ -266,11 +266,6 @@ nll.5 <- function(theta,dat,X) {
     mu_i <- mu[dat$subjId==i]
     n_i <- length(mu_i)
     
-    #gamma_i
-    gamma_i <- sum(dgamma(y_i, 1, rate = 1/phi, log = FALSE))
-    #gamma_i <- sum(dgamma(y_i, alpha=1, beta = 1/phi, log = FALSE))
-    
-    
     if(dat$sex[dat$subjId==i][1]=="female"){
       alpha <- alpha.f
     }
@@ -279,7 +274,7 @@ nll.5 <- function(theta,dat,X) {
     }
     
     ones <- matrix(1,n_i,n_i)
-    V_i <- diag(n_i)*((sigma*alpha)/gamma_i) + ones*((sigma.u*alpha)/gamma_i)
+    V_i <- diag(n_i)*sigma*alpha+ones*sigma.u*alpha
     
     max.day <- max(dat$day[dat$subjId==i]) #max no of days
     
@@ -295,9 +290,14 @@ nll.5 <- function(theta,dat,X) {
       }
     }
     
-    V_i <- V_i + ma*((sigma.v*alpha)/gamma_i)
+    V_i <- V_i + ma*sigma.v*alpha
     
-    likelihood = log(1/((2*pi)^(n_i/2)*sqrt(det(V_i)))*exp(-0.5*t(y_i-mu_i)%*%solve(V_i)%*%(y_i-mu_i)))
+    
+    constant = (1/(sqrt(det(V_i))*(2*pi)^(n_i/2)))*((phi^phi)/gamma(phi))
+    alpha_g = phi + (n_i/2)
+    beta_g = (0.5*t(y_i-mu_i)%*%solve(V_i)%*%(y_i-mu_i)) + phi
+      
+    likelihood = log((gamma(alpha_g)/(beta_g^(alpha_g)))*constant)
     L = L - likelihood 
     
   }
@@ -307,14 +307,15 @@ nll.5 <- function(theta,dat,X) {
 }
 
 X <- model.matrix(fit1)
-theta5 <- c(0.5, -0.1, 0.1, 0.1, 0.1,0.5, 1)
+theta5 <- c(0.5, -0.1, 0.1, 0.1, 0.1, 0.5,0.5)
 fit.nll.5 <- nlminb(theta5, nll.5, dat = clothing, X = X)
 
 fit.nll.5
 sqrt(exp(fit.nll.5$par[3:5]))
 fit.nll.5$par[6]
 fit.nll.5$par[7]
-fit1
+
+
 
 
 
@@ -415,12 +416,14 @@ setwd("/Users/idabukhvillesen/Documents/GitHub/Adv-data-analysis-projects/Ass3")
 compile("clothing.cpp")
 #dyn.load(dynlib("beetle"))
 parameters <- list(Id = rep(1, no.persons), ## noticfe random effects also parameters
+                   u = rep(1, no.persons),
+                   v = rep(1, no.persons),
+                   gamma = rep(1, no.persons),
                    sexID = sexId,
                    mu = c(0,0),
                    sigma = 1,
                    sigmau = 1,
                    sigmav = 1,
-                   alphaf = 0.5,
                    alpham = 0.5
 )
 
@@ -428,7 +431,7 @@ parameters <- list(Id = rep(1, no.persons), ## noticfe random effects also param
 ## Define objective function
 obj <- MakeADFun(data = clothing,
                  parameters = parameters,
-                 random = c("Id"),
+                 random = c("u","v","gamma"),
                  DLL = "clothing"
 )
 
